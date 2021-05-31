@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="description" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel='icon' href='img/favicon.png' type='image/x-icon' />
+  <title>GPICI Explorer</title>
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js"></script>
+  <script type="text/javascript" src="js/mapboxgl-control-minimap.js"></script>
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css" rel="stylesheet" />
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" /> -->
+  
+
+  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
+  
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+  
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div id="map"></div>
+  <!-- <a id="ooo" href="javascript:genScreenshot()"> Get Screenshot</a> -->
+  <!-- <div id="box1"></div> -->
+
+
+
+  <button type="button" class="button3d" value="2D">2D</button>
+  <button type="button" id='button-zoom' class='button' title="Reset the entire map"><i class="icon"></i></button>
+  <button type="button" id='button-download' class='button' title="Download the filtered buildings"><i
+      class="icon-download"></i></button>
+      <h5 id="arrow-mobile">?</h5>
+
+      <div class="map-console" id="map-console2">
+
+        <p><a  target="_blank"><img id="text" src="img/textENG.png" /></a></p>
+      </div>
+  <div class="map-console">
+
+   
+
+
+
+    
+
+    <p><a  target="_blank"><img id="logo" src="img/logo.png" /></a></p>
+
+    <!-- <h1 id="title">GPICI Explorer</h1>  -->
+
+    <h3 id="language">Language</h2>
+    <div class="btn-group class" id="buttons-group-language" role="group" aria-label="Basic example">
+      <button id ="eng" class="btn btn-secondary filter2 active">ENGLISH</button>
+      <button id ="jap" class="btn btn-secondary filter2 non" style="opacity:0.4">日本語</button>
+    </div>
+    <!-- <h1>INTERACTIVE MAP</h1> -->
+
+    <!-- <h3>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
+      standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a
+      type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
+      remaining essentially unchanged.</h3> -->
+    <h2 id="city">Click a City in the Map</h2>
+
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" id="button0" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Select City &#9662
+      </button>
+      <div class="dropdown-menu first" id="dropdown-menu0" data-selection="0" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="#" id="city_0" value="0">New York</a>
+        <a class="dropdown-item" href="#" id="city_1" value="1">London</a>
+        <a class="dropdown-item" href="#" id="city_2" value="2">Paris</a>
+        <a class="dropdown-item" href="#" id="city_3" value="3">Tokyo</a>
+        <a class="dropdown-item" href="#" id="city_4" value="4">Hong Kong</a>
+        <a class="dropdown-item" href="#" id="city_5" value="5">Shanghai</a>
+        <a class="dropdown-item" href="#" id="city_6" value="6">Singapore</a>
+        <a class="dropdown-item" href="#" id="city_7" value="7">Seoul</a>
+        
+      </div>
+    </div>
+
+  
+    <!-- <div id="menu">
+      <a id ="heat" href="#" data-id="2" data-layer="posters-heat" class="active">HEATMAP</a>
+      <a id="bars" href="#" data-id="3"data-layer="posters-bars" class="none">AVG INDEX</a>
+    </div> -->
+
+
+    <div class="btn-group class" id="buttons-group1" role="group" aria-label="Basic example">
+      <button id ="5km" class="btn btn-secondary filter2 active"  data-layer="grid">5km</button>
+      <button id ="10km" class="btn btn-secondary filter2 non" style="opacity:0.4"  data-layer="streets">10km</button>
+    </div>
+
+
+    <div class="btn-group class" id="buttons-group2" role="group" aria-label="Basic example">
+      <button id ="green" title="Areas with significant green coverage including trees, dense shrubbery, or grassy fields."   class="btn btn-secondary filter2b active" data-layer="green0&green1&green2&green3&green4&green5&green6">Green</button>
+      <button id ="streets" title="Paths designated for cycling. " class="btn btn-secondary filter2b active"  data-layer="streets">Cycling</button>
+      <button id ="airports" title="Airports" class="btn btn-secondary filter2b active"  data-layer="airports">Airports</button>
+    </div>
+
+    <select name="soft_skill_list[]" class="soft_skill_list"  id="soft_skill_list" multiple="multiple">
+      <!-- <option value ="airports" title="Major airports serving the target city.">Airports</option>
+      <option value="buildings" title="Buildings with a height of 100+ meters.">Buildings</option>
+      <option value="companies" title="Companies appearing in the Fortune Global 500 which also have their HQ in the target city.">Companies</option>
+      <option value= "conventions"title="Convention centers and event spaces located in the target city.">Convention & Event Spaces</option>
+      <option value="embassies"title="Embassies and consulates located in the target city.">Embassies</option>
+      <option value= "hospital"title="General hospitals providing a wide range of medical services.">Hospital</option>
+      <option value="hotels" title="Hotels in the target city.">Hotels</option>
+      <option value="museums" title="Museums and art galleries located in the target city.">Museums & Galleries</option>
+      <option value="restaurants" title="Restaurants with a Michelin star rating, as well as those with a Michelin Plate / Bib Gourmand.">Restaurants</option>
+      <option value= "schools"title="International schools located in the target city.">International Schools</option>
+      <option value="shoppingmalls" title="Major shopping centers in the target city.">Shopping Centers</option>
+      <option value= "stadiums"title="Stadiums with a capacity above 5,000 spectators.">Stadiums</option>
+      <option value="stations" title="Train stations (Metro / Underground / Subway, etc) in the target city.">Stations</option>
+      <option value="theaters" title="Theaters, concert halls, and auditoriums used for live performances.">Theaters & Halls</option>
+      <option value="universities" title="Universities ranked within the top 1000 of Times Higher Education's World University Rankings.">Universities</option> -->
+    </select>
+
+    <div class="btn-group class1" id="buttons-group"  aria-label="Basic example"></div>
+  <h4 id="subcat" style="display:none" >Filter sub-categories</h4>
+    <div class="btn-group class" id="rate-group" role="group" aria-label="Basic example"></div>
+
+    <h4 id="number-filtered" style="display:none" >Number of filtered items:</h4>
+    <h4 id="number-filtered-val" style="display:none" ></h4>
+
+  </div>
+
+  <script src="//d3js.org/d3.v4.min.js" charset="utf-8"></script>
+
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.js"></script>
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.css"
+    type="text/css" />
+  <script src="js/main.js"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script> -->
+
+
+</body>
+
+</html>
