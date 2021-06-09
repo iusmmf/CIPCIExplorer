@@ -31,6 +31,7 @@ var domainButtons = [
   ["All"],
   ["All"],
 ];
+
 var listSelected = [];
 var filterTot = ["any"];
 var keysCustom = [
@@ -235,7 +236,6 @@ function filterType(item) {
 
   map.setFilter("rects", filterTot);
   map.setFilter("cumulative", filterTot);
-  //map.setFilter("cumulative", filter);
 
   $(".filter").css("background-color", colButtons);
   if (item.length == 3) {
@@ -401,9 +401,9 @@ $("#jap").on("click", function (e) {
 var center = [3.842, 34.691];
 var zoom = 1.95;
 
-mapboxgl.accessToken = "pk.eyJ1IjoidmluY2Vuem8tbSIsImEiOiJjazkxODJsc2UwMXFvM2Zud3o0dnR5ejl6In0.mAQ5Dz6EhfUPwOoavcXj9w";
+mapboxgl.accessToken = "pk.eyJ1IjoidmluY2Vuem8tbSIsImEiOiJja2U0YXZ6aWUwMzFkMnZwODJneGNuOGZpIn0.pnzPmtMFtNHwvJkjBAPy4Q";
 const map = new mapboxgl.Map({
-  attributionControl: false,
+  attributionControl: true,
   container: "map",
   style: "mapbox://styles/vincenzo-m/ckbc7weli0obg1io1a2z6u02m",
   center: center,
@@ -415,18 +415,16 @@ const map = new mapboxgl.Map({
 var nav = new mapboxgl.NavigationControl();
 map.addControl(nav, "top-right");
 
-map.addControl(
-  new mapboxgl.AttributionControl({
-    customAttribution: '© <a href="https://www.deepmoire.com/" target="_blank";">DeepMoiré</a>',
-  })
-);
+// map.addControl(
+//   new mapboxgl.AttributionControl({
+//     customAttribution: '© <a href="https://www.deepmoire.com/" target="_blank";">DeepMoiré</a>',
+//   })
+// );
 
 //POP-UP OPTIONS
 var popup = new mapboxgl.Popup({
   closeButton: false,
   closeOnClick: false,
-  // anchor: 'bottom-left',
-  // offset: [linearOffset, -linearOffset]
 });
 
 function numberWithCommas(x) {
@@ -580,15 +578,32 @@ map.on("load", function () {
       "settlement-minor-label"
     );
 
+    var domainButtons = [
+      ["1896-1989", "1990-2000", "2001-2006", "2007-2013", "2014-2020"],
+      ["All"],
+      ["400-500m ", "501-2.700m", "2701-14000m", "14001-75000m", ">75001m"],
+      ["All"],
+      ["All"],
+      ["1★", "2★", "3★", "4★", "5★"],
+      ["Museum", "Art"],
+      ["1★", "2★", "3★", "Bib Gourmand", "Michelin Plate"],
+      ["All"],
+      ["Shopping Centre", "Department Store"],
+      ["All"],
+      ["All"],
+      ["All"],
+      ["All"],
+    ];
+
     var domain = [
       [1896, 1990, 2001, 2007, 2014, 2020],
       [0, 1],
-      [50, 501, 2701, 14001, 75001],
+      [400, 500, 501, 2700, 2701, 14000, 14001, 75000, 75001, 999999999999999],
       [0, 1],
       [0, 1],
       [1, 2, 3, 4, 5],
-      [1, 2, 3, "Bib Gourmand", "Michelin Plate"],
       [0, 1],
+      [1, 2, 3, "Bib Gourmand", "Michelin Plate"],
       [0, 1],
       [0, 1],
       [0, 1],
@@ -599,7 +614,9 @@ map.on("load", function () {
 
     // CREATE RATING PROPERTY USING D3 DOMAIN
     var fiveStars = [0, 1, 2, 3, 4];
-    var scaled0 = d3.scaleQuantile().domain(domain[1]).range(fiveStars)("2019");
+    //var scaled0 = d3.scaleQuantile().domain(domain[1]).range(fiveStars)("2019");
+    var scaled0 = d3.scaleQuantile().domain(domain[2]).range(fiveStars)(76000);
+    console.log(scaled0);
 
     scaled0 = Math.round(scaled0);
     if (scaled0 > 5) {
@@ -608,17 +625,19 @@ map.on("load", function () {
 
     var rateProperty = ["year", "fileName", "floor_area_m", "fileName", "fileName", "rating", "type", "rating", "fileName", "type", "fileName", "fileName", "fileName", "fileName"];
     var exceptions = ["one star", "two stars", "three stars", "Bib Gourmand", "Michelin Plate", "art", "museum", "Shopping Centre", "department", "mall"];
-    var exceptionsSub = [0, 1, 2, 3, 4, 4, 0, 0, 4, 4];
+    var exceptionsSub = [0, 1, 2, 3, 4, 4, 0, 0, 4, 0];
 
-    var ops = d3.scaleQuantile().domain(domain[5]).range(fiveStars)(1.2);
+    var ops = d3.scaleQuantile().domain(domain[5]).range(fiveStars)(3.5);
     var ops2 = Math.round(ops);
     if (ops2 > 4) {
       ops2 = 4;
     }
     console.log(ops2);
     // ADD POINTS GEOJSON
-    d3.json("data/cumulative1.geojson", function (err, dataCumulative) {
+    d3.json("data/cumulative2.geojson", function (err, dataCumulative) {
       if (err) throw err;
+
+      console.log(dataCumulative);
 
       var gigi = [];
 
@@ -631,12 +650,16 @@ map.on("load", function () {
         return d.properties.fileName !== "airports";
       });
 
-      dataCumulative.features = dataCumulative.features.filter(function (d) {
-        return d.properties.floor_area_m > 399 || typeof d.properties.floor_area_m == "undefined" || typeof d.properties.rooms > 4;
-      });
+      // || typeof d.properties.floor_area_m == "undefined"
 
       //PRE-PROCESS DATA
       dataCumulative.features = dataCumulative.features.map(function (d) {
+        if (d.properties.floor_area_m < 399 || d.properties.rooms < 4) {
+          d.properties.cleaned = 0;
+        } else {
+          d.properties.cleaned = 1;
+        }
+
         d.properties["id_code"] = d.id;
         var fileNameRead = d.properties.fileName;
         d.properties.city = d.properties.city.toLowerCase();
@@ -685,18 +708,17 @@ map.on("load", function () {
           scaled = exceptionsSub[indexExcep];
         } else {
           toScale = d.properties[rateProperty[indexCategory]];
+          if (indexCategory == 5) {
+            toScale = Math.round(toScale - 0.01);
+          }
           scaled = d3.scaleQuantile().domain(domain[indexCategory]).range(fiveStars)(toScale);
         }
 
-        if (indexCategory == 5) {
-          scaled = scaled - 0.01;
-        }
-
-        var scaled2 = Math.round(scaled);
+        var scaled2 = scaled;
         if (scaled2 > 4) {
           scaled2 = 4;
         }
-        gigi.push(scaled);
+        gigi.push(scaled2);
 
         if (typeof scaled2 == "undefined" || scaled2 == null || isNaN(scaled2)) {
           d.properties["rateTotal_" + fileNameRead] = 0;
@@ -709,6 +731,12 @@ map.on("load", function () {
         return d;
       });
 
+      dataCumulative.features = dataCumulative.features.filter(function (d) {
+        return d.properties.cleaned == 1;
+      });
+
+      console.log(dataCumulative);
+
       var all5km = dataCumulative.features.filter(function (d) {
         return d.properties.in_area_5km == 1;
       });
@@ -716,8 +744,6 @@ map.on("load", function () {
       var all10km = dataCumulative.features.filter(function (d) {
         return d.properties.in_area_10km == 1;
       });
-
-      console.log(dataCumulative);
 
       //ADD TOTALS VALUES FOR DIFFERENT RADIUS TO THE CITY GEOJSON
       data.features = data.features.map(function (d) {
@@ -830,7 +856,7 @@ map.on("load", function () {
         document.getElementById("buttons-group").appendChild(newElement);
       });
 
-      for (i = 0; i < 7; i++) {
+      for (i = 0; i < 8; i++) {
         var greenLayer = "green" + i;
         map.setLayoutProperty(greenLayer, "visibility", "visible");
       }
@@ -850,14 +876,13 @@ map.on("load", function () {
         var clickedLayerMulti = [];
 
         if (clickedLayerA == "green") {
-          for (i = 0; i < 7; i++) {
+          for (i = 0; i < 8; i++) {
             var greenLayer = "green" + i;
             clickedLayerMulti.push(greenLayer);
           }
         } else {
           clickedLayerMulti = clickedLayerA.split("&");
         }
-        console.log(clickedLayerMulti);
 
         e.stopPropagation();
 
